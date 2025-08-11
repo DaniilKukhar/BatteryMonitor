@@ -1,0 +1,131 @@
+included:
+  - TestTask/App
+  - TestTask/Features
+  - TestTask/Support
+  - TestTask/Tests
+excluded:
+  - Pods
+  - Carthage
+  - Build
+  - DerivedData
+  - TestTask/App/AppDelegate.swift
+  - TestTask/App/SceneDelegate.swift
+
+line_length:
+  warning: 120
+  error: 170
+  ignores_comments: true
+  ignores_urls: true
+  ignores_function_declarations: true
+  ignores_interpolated_strings: true
+
+file_length: { warning: 400, error: 650 }
+type_body_length: { warning: 200, error: 350 }
+function_body_length: { warning: 40, error: 80 }
+cyclomatic_complexity: { warning: 10, error: 20 }
+
+identifier_name:
+  min_length: { warning: 2, error: 1 }
+  max_length: { warning: 40, error: 50 }
+  excluded: [id, vc, ok, on, x, y]
+
+type_name:
+  max_length: { warning: 40, error: 50 }
+
+disabled_rules:
+  - nesting
+  - vertical_whitespace
+
+opt_in_rules:
+  - attributes
+  - closure_end_indentation
+  - closure_spacing
+  - collection_alignment
+  - empty_count
+  - empty_string
+  - explicit_acl
+  - explicit_init
+  - implicit_return
+  - redundant_nil_coalescing
+  - sorted_imports
+  - trailing_closure
+  - unneeded_parentheses_in_closure_argument
+  - weak_delegate
+  - force_unwrapping
+  - closure_weak_self_viewmodel_service
+
+sorted_imports: { severity: warning }
+force_unwrapping: { severity: error }
+force_cast: { severity: error }
+force_try: { severity: warning }
+todo: { severity: warning }
+
+# analyzer_rules:
+#   - unused_declaration
+#   - unused_import
+
+custom_rules:
+
+  data_layer_no_uikit:
+    included: ["Features/.*/Data/"]
+    name: "Data: UIKit/SwiftUI import"
+    regex: "^[[:space:]]*import[[:space:]]+(UIKit|SwiftUI)\\b"
+    message: "Data layer must not import UIKit/SwiftUI. Move UI to Presentation."
+    severity: error
+
+  presentation_no_networking_symbols:
+    included: ["Features/.*/Presentation/"]
+    name: "Presentation: forbidden networking/system APIs"
+    regex: "\\b(URLSession|URLRequest|JSONEncoder|JSONDecoder|BGTaskScheduler|UIBackgroundTaskIdentifier|FileManager|NotificationCenter\\.addObserver)\\b"
+    message: "No networking/system infra in Presentation. Move to Data/Domain."
+    severity: error
+
+  viewcontroller_no_business_logic:
+    included: ["Features/.*/Presentation/"]
+    name: "VC: business logic in VC"
+    regex: "\\b(Encodable|Decodable|Codable|JSONSerialization|URLComponents|BGAppRefreshTask|DispatchQueue\\.global)\\b"
+    message: "VC must stay thin. Move business/infra to ViewModel/Services."
+    severity: warning
+
+  service_requires_protocol:
+    included: ["Features/"]
+    name: "Service/Repository/Client without protocol"
+    regex: "^[[:space:]]*(final[[:space:]]+)?class[[:space:]]+\\w+(Service|Repository|Client)[[:space:]]*\\{"
+    message: "Classes *Service/*Repository/*Client must conform to a protocol."
+    severity: error
+
+  non_final_class:
+    included: ["App", "Features", "Support"]
+    excluded: ["Tests"]
+    name: "Class must be final"
+    regex: "^[[:space:]]*(?!final|open[[:space:]]+class|@objc|actor\\b)(public[[:space:]]+|internal[[:space:]]+|private[[:space:]]+)?class[[:space:]]+\\w+"
+    message: "Use 'final class' unless you really need inheritance."
+    severity: warning
+
+  no_print:
+    name: "Do not use print/debugPrint"
+    regex: "\\b(print|debugPrint)[[:space:]]*\\("
+    message: "Use os_log/Logger instead."
+    severity: error
+
+  timer_requires_weak_self:
+    name: "Timer without weak self"
+    regex: "Timer\\.scheduledTimer\\([^)]*\\)[[:space:]]*\\{[[:space:]]*(?!\\[[[:space:]]*weak[[:space:]]+self[[:space:]]*\\])"
+    message: "Add [weak self] in timer closures."
+    severity: warning
+
+  closure_weak_self_viewmodel_service:
+    included:
+      - "Features/.*/ViewModel/"
+      - "Features/.*/Service/"
+    name: "Closure: missing [weak self] in VM/Service"
+    regex: "\\{[[:space:]]*(?!\\[[[:space:]]*weak[[:space:]]+self[[:space:]]*\\]).*?\\bself\\b"
+    message: "Add [weak self] if self is used in closures inside ViewModel or Service."
+    severity: warning
+
+  presentation_no_data_imports:
+    included: ["Features/.*/Presentation/"]
+    name: "Presentation: importing Data layer"
+    regex: "^[[:space:]]*import[[:space:]]+(BackgroundTasks)\\b"
+    message: "Do not import infrastructure into Presentation."
+    severity: error
